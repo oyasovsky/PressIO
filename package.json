@@ -5,7 +5,10 @@
   "main": "test.js",
   "dependencies": {
    "express": "4.13.3",
-   "feed-read":"*"
+   "feed-read":"*",
+   "http":"*",
+   "jsdom":"*",
+   "deasync":"*"
   },
   "repository": {
     "type": "git",
