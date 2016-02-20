@@ -4,7 +4,8 @@
   "description": "hack.summit() hackathon",
   "main": "test.js",
   "dependencies": {
-   "express": "4.13.3"
+   "express": "4.13.3",
+   "feed-read":"*"
   },
   "repository": {
     "type": "git",
