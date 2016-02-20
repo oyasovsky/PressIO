@@ -34,13 +34,14 @@ ul.rss-tags li.rssHidden {
 	font-weight: bold;
 	color: #6c6c6c;
 	cursor: pointer;
+	margin-left: 20px;
 }
 
 .rssTagsHolder {
 	margin: 20px;
 }
 
-.title {
+.title {	
 	color: #6c6c6c;
 	font-size: 40px;
 	margin: 20px;
@@ -57,4 +58,8 @@ ul.rss-tags li.rssHidden {
 .modal-body a.download {
 	position: relative;
 	top: -10px;
+}
+
+#mceu_16 {
+	margin-top: 20px;
 }

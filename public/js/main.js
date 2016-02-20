@@ -53,8 +53,6 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 			var rssArray = response;
 
 			rssArray.sort(function(a,b){
-				console.log("a: ",a);
-				console.log("b: ", b);
 				for (var i = 0; i < a.length; i++) {
 					if (a[i].numberOfSimilarities) {
 						break;
@@ -65,7 +63,6 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 						break;
 					}
 				}
-				console.log("a[i]: ", a[i]);
 
 				if (a[i].numberOfSimilarities === undefined) return -1;
 				if (b[k].numberOfSimilarities === undefined) return 1;
