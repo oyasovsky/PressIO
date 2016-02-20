@@ -2,6 +2,10 @@ body {
 	font-family: 'Open Sans', sans-serif;
 }
 
+.hide {
+	display: none;
+}
+
 ul.rss-tags {
 	list-style-type: none;
 	padding: 0;
@@ -40,4 +44,17 @@ ul.rss-tags li.rssHidden {
 	color: #6c6c6c;
 	font-size: 40px;
 	margin: 20px;
+}
+
+.modal-body {
+	padding:30px;
+}
+
+.modal-body audio {
+	width: 100%;
+}
+
+.modal-body a.download {
+	position: relative;
+	top: -10px;
 }

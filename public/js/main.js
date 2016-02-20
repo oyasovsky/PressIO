@@ -1,6 +1,13 @@
-var colors = ['#1abc9c',  '#57d68d', '#5cace2', '#9b59b6', '#f1c40f', '#e67e22', '#e74e60']
-angular.module('pressIO', [])
-	.controller('RSSTagsController', ['$scope', '$http', function ($scope, $http) {
+var colors = ['#1abc9c',  '#57d68d', '#5cace2', '#9b59b6', '#f1c40f', '#e67e22', '#e74e60'];
+
+window.AudioContext = window.AudioContext||window.webkitAudioContext;
+  context = new AudioContext();
+
+(function(){
+	
+app = angular.module('pressIO', [] );
+	
+app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($scope, $http, $window) {
 	$scope.rssFeeds = [
       	"David Bowie",
       	"Turkey Bombing",
@@ -14,6 +21,13 @@ angular.module('pressIO', [])
 
 	$scope.hiddenTopics = $scope.rssFeeds.length > 6;
 	$scope.moreTagText = "Show More...";
+	$scope.audioSrc = "";
+
+
+	$scope.showAudioModal = false;
+	$scope.toggleAudioModal = function(){
+        	$scope.showAudioModal = !$scope.showAudioModal;
+    	};
 
 	$scope.setColor = function(index) {
 		var i = (index>=colors.length) ? index % colors.length : index;
@@ -32,6 +46,7 @@ angular.module('pressIO', [])
 	};
 
 	$scope.saveAudio = function(tinymce) {
+		$scope.toggleAudioModal();
 		var content = tinymce.get('article').getContent();
 		var element = $("<div>"+content+"</div>");
 	
@@ -47,8 +62,10 @@ angular.module('pressIO', [])
 		    headers: { 'Content-Type': 'application/x-www-form-urlencoded'},
 		    data: data
 		}).success(function(response, status, headers, config){	
-			console.log("here");
-					
+			var fileName = response;
+			$scope.audioSrc = window.location.host + "/audio/"+ fileName;
+			$("#modalAudio .loader").hide();
+			$("#modalAudio .main").show();
 		});
 
 	};
@@ -58,6 +75,55 @@ angular.module('pressIO', [])
 	};
 
   }]);
+
+app.config(['$compileProvider', function ($compileProvider) {
+	$compileProvider.urlSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|blob):/);
+}]);
+
+
+app.directive('modal', function () {
+    return {
+      template: '<div class="modal fade">' + 
+          '<div class="modal-dialog">' + 
+            '<div class="modal-content">' + 
+              '<div class="modal-header">' + 
+                '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' + 
+                '<h4 class="modal-title">{{ title }}</h4>' + 
+              '</div>' + 
+              '<div class="modal-body" ng-transclude></div>' + 
+            '</div>' + 
+          '</div>' + 
+        '</div>',
+      restrict: 'E',
+      transclude: true,
+      replace:true,
+      scope:true,
+      link: function postLink(scope, element, attrs) {
+        scope.title = attrs.title;
+
+        scope.$watch(attrs.visible, function(value){
+          if(value === true)
+            $(element).modal('show');
+          else
+            $(element).modal('hide');
+        });
+
+        $(element).on('shown.bs.modal', function(){
+          scope.$apply(function(){
+            scope.$parent[attrs.visible] = true;
+          });
+        });
+
+        $(element).on('hidden.bs.modal', function(){
+          scope.$apply(function(){
+            scope.$parent[attrs.visible] = false;
+          });
+        });
+      }
+    };
+  });
+
+})();
 
 function ajaxExportAudio(tinymce) {
 	var scope = angular.element(
