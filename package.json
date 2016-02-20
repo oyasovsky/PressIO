@@ -11,6 +11,7 @@
    "feed-read":"*",
    "http":"*",
    "jsdom":"*",
+   "wordpos":"*",
    "deasync":"*"
   },
   "repository": {
