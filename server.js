@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser')
 var fs = require('fs');
 var path = require('path');
+var unirest = require('unirest');
 
 var app = express();
 
@@ -25,7 +26,7 @@ app.listen(3003, function () {
 app.post('/api/generateAudio', function(req, res) {
 
 	var text = req.body.text;	
-	var audioTmpDir = __dirname + "audioTmp";
+	var audioTmpDir = __dirname + "/audioTmp";
  	
 	if (!fs.existsSync(audioTmpDir)){
 		fs.mkdirSync(audioTmpDir);
@@ -35,4 +36,19 @@ app.post('/api/generateAudio', function(req, res) {
 	var mp3Path = path.join(audioTmpDir, fileName);
 	var mp3_file = fs.createWriteStream(mp3Path); 	
 
+	unirest.post("https://voicerss-text-to-speech.p.mashape.com/?key=9741a4decd9b45f2a57e5de2f988acac")
+			.header("X-Mashape-Key", "6Pl6rUnCq9mshVk6T4oBryUhXjwqp1cJrY2jsnHPsQrtwWSfsn")
+			.header("Content-Type", "application/x-www-form-urlencoded")
+			.encoding(null)
+			.send("c=mp3")
+			.send("f=8khz_8bit_mono")
+			.send("hl=en-us")
+			.send("r=0")
+			.send("src="+text)
+			.end(function (result) {
+		    		mp3_file.write(result.body);
+		    		mp3_file.end();
+		    		res.write(fileName);
+		    		res.end();
+			});
 });
