@@ -4,10 +4,15 @@ var wordpos= new WordPOS();
 var deasync = require('deasync');
 
 var rssFeedsArray = [['http://rss.cnn.com/rss/edition.rss',require('./cnnParser')]];
+var consolidatedData = [];
 
 var data = {};
 var doneParseRss = false;
+var doneGoingOverFeeds = false;
+
 var waitForFunctionParseRss = function() { return !doneParseRss; };
+var waitForFunctionParseRssFeed = function() { return !doneGoingOverFeeds; };
+
 function paragraphsFormater(pharagraphs) {
 	return pharagraphs;
 }
@@ -102,10 +107,12 @@ function parseFeed(rssFeed) {
 			deasync.loopWhile(waitForFunctionParseRss);	
 			var paragraphs = parser.getParsedData(articles[j].link);
 			paragraphs=paragraphsFormater(paragraphs);
+			consolidatedData.push({"source":feedUrl, "articleData":articles[j],"parsedData":data,"pharagraps":paragraphs});
 			doneParseRss=false;
 			console.log("Data : " +JSON.stringify(data));
 			data={};
 		}
+		doneGoingOverFeeds=true;
 	});
 
 }
@@ -113,7 +120,10 @@ function parseFeed(rssFeed) {
 function main() {
 	for (var i = 0; i <  rssFeedsArray.length; i++) {
 		parseFeed(rssFeedsArray[i]);
+		deasync.loopWhile(waitForFunctionParseRssFeed);
+		doneGoingOverFeeds=false;
 	}
+	console.log(consolidatedData);
 }
 
 main();
