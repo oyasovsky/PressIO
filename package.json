@@ -12,6 +12,7 @@
    "http":"*",
    "jsdom":"*",
    "wordpos":"*",
+   "hashes":"*",
    "deasync":"*"
   },
   "repository": {

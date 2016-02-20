@@ -2,16 +2,27 @@ var feed = require('feed-read');
 var WordPOS = require('wordpos');
 var wordpos= new WordPOS();
 var deasync = require('deasync');
+var hashes = require('hashes');
+
+var excludeWordsSet = new hashes.HashSet();
+excludeWordsSet.add('full');
+excludeWordsSet.add('episode');
+excludeWordsSet.add('watch');
+
 
 var rssFeedsArray = [['http://rss.cnn.com/rss/edition.rss',require('./cnnParser')]];
 var consolidatedData = [];
+var NUMBER_OF_SIMILARITIES_TO_MATCH=2;
 
 var data = {};
+var buckets = [[]].pop(); //creating enpty matrix
 var doneParseRss = false;
 var doneGoingOverFeeds = false;
 
 var waitForFunctionParseRss = function() { return !doneParseRss; };
 var waitForFunctionParseRssFeed = function() { return !doneGoingOverFeeds; };
+
+function isNumber(n) { return /^-?[\d.]+(?:e-?\d+)?$/.test(n); } 
 
 function paragraphsFormater(pharagraphs) {
 	return pharagraphs;
@@ -109,12 +120,69 @@ function parseFeed(rssFeed) {
 			paragraphs=paragraphsFormater(paragraphs);
 			consolidatedData.push({"source":feedUrl, "articleData":articles[j],"parsedData":data,"pharagraps":paragraphs});
 			doneParseRss=false;
-			console.log("Data : " +JSON.stringify(data));
 			data={};
 		}
 		doneGoingOverFeeds=true;
 	});
 
+}
+
+
+function findNumberOfSimilarObject(array1,array2) {
+	var array1Index = 0;
+	var array2Index = 0;
+	var numberOfSimilarities = 0;
+	while (array1Index < array1.length && array2Index < array2.length) {
+		if (excludeWordsSet.contains(array1[array1Index]) || isNumber(array1[array1Index])) {
+			array1Index++;
+			continue;
+		}		
+                if (excludeWordsSet.contains(array2[array2Index]) || isNumber(array2[array2Index])) {                                                      
+                        array1Index++;                                        
+                        continue;                                             
+                }
+		if (array1[array1Index] == array2[array2Index]) {
+			array1Index++;
+			array2Index++;
+			numberOfSimilarities++;
+		} else {
+			if (array1[array1Index] > array2[array2Index]) {
+				array2Index++;
+			} else {
+				array1Index++;
+ 			}
+		}
+	}
+	return numberOfSimilarities;
+}
+
+function advancedBucketSort() {
+	for (var k = 0 ; k < consolidatedData.length; k++) {
+		var mostSimilarIndex = -1;
+		var maxOfGlobalIdenticals = 0;
+		for (var i = 0  ; i < buckets.length ; i++) {
+			var maxOfLocalIdenticals = 0;
+			for (var j = 0 ; j < buckets[i].length; j++) {
+				var numOfLocalIdenticals = findNumberOfSimilarObject(consolidatedData[k].parsedData.nouns,buckets[i][j].parsedData.nouns);
+				numOfLocalIdenticals = findNumberOfSimilarObject(consolidatedData[k].parsedData.verbs,buckets[i][j].parsedData.verbs);
+				numOfLocalIdenticals = findNumberOfSimilarObject(consolidatedData[k].parsedData.adverbs,buckets[i][j].parsedData.adverbs);
+				numOfLocalIdenticals = findNumberOfSimilarObject(consolidatedData[k].parsedData.adjectives,buckets[i][j].parsedData.adjectives);
+				numOfLocalIdenticals = findNumberOfSimilarObject(consolidatedData[k].parsedData.rest,buckets[i][j].parsedData.rest);
+				if (numOfLocalIdenticals > maxOfLocalIdenticals) {
+					maxOfLocalIdenticals = numOfLocalIdenticals;
+				}
+			}
+			if (maxOfLocalIdenticals > maxOfGlobalIdenticals) {
+				maxOfGlobalIdenticals=maxOfLocalIdenticals ;
+				mostSimilarIndex = i;
+			}
+		}
+		if (mostSimilarIndex != -1 && maxOfGlobalIdenticals >= NUMBER_OF_SIMILARITIES_TO_MATCH) {
+			buckets[mostSimilarIndex].push(consolidatedData[k]);
+		} else {
+			buckets.push([consolidatedData[k]]);
+		}
+	}
 }
 
 function main() {
@@ -123,7 +191,8 @@ function main() {
 		deasync.loopWhile(waitForFunctionParseRssFeed);
 		doneGoingOverFeeds=false;
 	}
-	console.log(consolidatedData);
+	advancedBucketSort();
+	console.log(JSON.stringify(buckets));
 }
 
 main();
