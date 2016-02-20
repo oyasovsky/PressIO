@@ -1,4 +1,5 @@
 var feed = require('feed-read');
+var http = require('http');
 var WordPOS = require('wordpos');
 var wordpos= new WordPOS();
 var deasync = require('deasync');
@@ -9,22 +10,31 @@ excludeWordsSet.add('full');
 excludeWordsSet.add('episode');
 excludeWordsSet.add('watch');
 
+var articlePrimaryPictureLink='';
+var articleEntities='';
 
 var rssFeedsArray = [['http://rss.cnn.com/rss/edition.rss',require('./cnnParser')]];
 var consolidatedData = [];
 var NUMBER_OF_SIMILARITIES_TO_MATCH=2;
 
+var WATSON_API_KEY='d3781cd9347868503ec6d0322715621898fc5d9e';
+var GOOGLE_MAP_API_KEY= 'AIzaSyD68KmxQFlbJuxJ6r2DLBBNmK4aY7z5xpo';
+var WATSON_API_KEY='42d81bfd30f79b25cd1b3a6b60653e0cbb16b091';
+
 var data = {};
 var buckets = [[]].pop(); //creating enpty matrix
 var doneParseRss = false;
 var doneGoingOverFeeds = false;
+var doneGetPrimaryPictureLink  = false;
+var articleSummary ='';
 
 var waitForFunctionParseRss = function() { return !doneParseRss; };
 var waitForFunctionParseRssFeed = function() { return !doneGoingOverFeeds; };
-
+var waitToImageAndEntities = function() { return !doneGetPrimaryPictureLink ; };
 function isNumber(n) { return /^-?[\d.]+(?:e-?\d+)?$/.test(n); } 
 
 function paragraphsFormater(pharagraphs) {
+//TODO
 	return pharagraphs;
 }
 
@@ -185,6 +195,64 @@ function advancedBucketSort() {
 	}
 }
 
+function returnMap(name,zoom) {
+	return "https://maps.googleapis.com/maps/api/staticmap?center=" + encodeURIComponent(name) + "&zoom=" + zoom + "&size=300x300&maptype=roadmap&key=" + GOOGLE_MAP_API_KEY;
+}
+
+function getArticleImageAndEntities(url) {
+	var options = {
+		host: "gateway-a.watsonplatform.net",
+		port: 80,
+		path: '/calls/url/URLGetCombinedData?apikey=' + WATSON_API_KEY + '&url=' + url + '&outputMode=json&extract=entity,image-kw',
+		method: 'GET'
+	};
+
+	articlePrimaryPictureLink='';
+	articleEntities = '';
+	var body ='';
+	http.request(options,function(res) {
+		res.setEncoding('utf8');
+		res.on('data', function (chunk) {
+			body+=chunk;
+		});
+		res.on('end', function() {
+			articleJson=JSON.parse(body);
+			articlePrimaryPictureLink = articleJson.url;
+			articleEntities = articleJson.entities;
+			for (var i in articleEntities) {				
+				if (articleEntities[i].type === "Country") {
+					articleEntities[i].map = returnMap(articleEntities[i].text, 4);
+				} else {
+					if (articleEntities[i].type === "City") {
+						articleEntities[i].mapLink = returnMap(articleEntities[i].text, 12);
+					}
+				}
+			}
+			doneGetPrimaryPictureLink=true;
+		});
+	}).end();
+}
+
+function returnArticleExtraData(url) {
+	doneGetPrimaryPictureLink = false;
+
+	getArticleImageAndEntities(url);
+	deasync.loopWhile(waitToImageAndEntities);	
+	return { "image" : articlePrimaryPictureLink, "entities":articleEntities};
+}
+
+function addStuffToBuckets() {
+	for (var i = 0; i < buckets.length; i++) {
+		for (var j = 0; j < buckets[i].length; j++) {
+			articleSummary = '';	
+			var returnData= returnArticleExtraData(buckets[i][j].articleData.link);
+			buckets[i][j].imageLink=returnData.image;
+			buckets[i][j].entities = returnData.entities;
+		}
+		buckets[i].push({"numberOfSimilarities" : buckets[i].length});
+	}
+}
+
 function main() {
 	for (var i = 0; i <  rssFeedsArray.length; i++) {
 		parseFeed(rssFeedsArray[i]);
@@ -192,6 +260,7 @@ function main() {
 		doneGoingOverFeeds=false;
 	}
 	advancedBucketSort();
+	addStuffToBuckets();
 	console.log(JSON.stringify(buckets));
 }
 
