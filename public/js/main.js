@@ -45,6 +45,47 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 		$scope.moreTagText = $scope.hiddenTopics ? "Show More.." : "Show Less..."; 
 	};
 
+	$scope.updateRssTags = function updateRssTags() {
+		$http({
+                    url: "/api/getRssTags",
+                    method: "GET"
+                }).success(function(response, status, headers, config){
+			var rssArray = response;
+
+			rssArray.sort(function(a,b){
+				console.log("a: ",a);
+				console.log("b: ", b);
+				for (var i = 0; i < a.length; i++) {
+					if (a[i].numberOfSimilarities) {
+						break;
+					}
+				}
+				for (var k = 0; k < b.length; k++) {
+					if (b[k].numberOfSimilarities) {
+						break;
+					}
+				}
+				console.log("a[i]: ", a[i]);
+
+				if (a[i].numberOfSimilarities === undefined) return -1;
+				if (b[k].numberOfSimilarities === undefined) return 1;
+				return  (b[k].numberOfSimilarities) - (a[i].numberOfSimilarities);
+			});
+
+			for (var i=0 ; i<rssArray.length; i++){
+				$scope.rssFeeds[i] = { "text":getShortstRssTitle(rssArray[i]), "sources" :rssArray[i][rssArray[i].length-1].numberOfSimilarities };
+			}
+
+			$scope.hiddenTopics = $scope.rssFeeds.length > 6;
+	
+		}).error(function(error) {
+			console.log("An error occured: ", error);
+			$scope.error=error;
+		});
+	};
+
+
+
 	$scope.saveAudio = function(tinymce) {
 		$("#modalAudio .loader").show();
 		$("#modalAudio .errors").text("");
