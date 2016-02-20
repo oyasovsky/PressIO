@@ -4,6 +4,11 @@ var fs = require('fs');
 var path = require('path');
 var unirest = require('unirest');
 
+var WATSON_API_KEY='42d81bfd30f79b25cd1b3a6b60653e0cbb16b091';
+
+var bucketsHash = {};
+var buckets = null;
+
 var app = express();
 
 app.use(express.static(__dirname + '/public'));
@@ -17,6 +22,8 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 app.get('/', function (req, res) {
   res.redirect("/index.html");
 });
+
+buckets=loadBuckets();
 
 app.listen(3003, function () {
   console.log('Example app listening on port 3003!');
@@ -52,3 +59,35 @@ app.post('/api/generateAudio', function(req, res) {
 		    		res.end();
 			});
 });
+
+app.get('/api/getRssTags', function(req, res) {
+	res.write(buckets);
+	res.end();
+});
+
+function loadBuckets() {
+	var contents = fs.readFileSync("buckets.txt").toString();
+	var buckets = JSON.parse(contents);
+
+	for (var i=0; i<buckets.length; i++) {
+		var obj = buckets[i];
+		bucketsHash[getShortestRssTitle(obj)] = obj;
+	}
+
+	console.log("Loaded Buckets!");
+	return contents;
+}
+
+
+function getShortestRssTitle(rssTopicArray) {
+	var index=0;
+	var titleLength=30000;
+	for (var i=0; i<rssTopicArray.length; i++) {
+		if (rssTopicArray[i].numberOfSimilarities !== undefined) continue;
+		if (rssTopicArray[i].articleData.title.length < titleLength) {
+			titleLength = rssTopicArray[i].articleData.title.length;
+			index = i;
+		}	
+	}
+	return (rssTopicArray[index].articleData.title);
+}
