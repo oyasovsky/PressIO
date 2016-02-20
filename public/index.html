@@ -2,31 +2,46 @@
 <html ng-app="pressIO">
   <head>
 		<title>Sample Node.js Website</title>
-		<script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<script src="js/main.js"></script>
+                <script src="js/tinymce/js/tinymce/tinymce.js"/>
+		<script xmlns="http://www.w3.org/1999/xhtml" type="application/ecmascript" async="" src="js/FileSaver.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="css/main.css">
 		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 		<script>
 			tinymce.init({
-			  selector: 'textarea',
-			  height: 500,
-			  plugins: [
+			selector: 'textarea',
+			height: 700,
+			plugins: [
 			    'advlist autolink lists link image charmap print preview anchor',
 			    'searchreplace visualblocks code fullscreen',
 			    'insertdatetime media table contextmenu paste code'
-			  ],
-			  toolbar: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
-			  content_css: [
+			],
+			toolbar: 'savemenu insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+			content_css: [
 			    '//fast.fonts.net/cssapi/e6dc9b99-64fe-4292-ad98-6974f93cd2a2.css',
 			    '//www.tinymce.com/css/codepen.min.css'
-			  ]
-			});
+			],
+			setup: function(editor) {
+				editor.addButton('savemenu', {
+					type: "menubutton",
+					text: "Save As",
+					icon: false,
+					menu: [{
+						text: "Save as HTML",
+						onclick: function() {
+							tinymce.triggerSave();
+						}
+					}]	
+				});
+			}
+			})
+
 		</script>
 	</head>
 	<body ng-controller="RSSTagsController">
-	
+		<h1 class="title">PressIO</h1>
 		<ul class="rss-tags">
 		  <li ng-repeat="rss in rssFeeds">
 			{{ rss }}
