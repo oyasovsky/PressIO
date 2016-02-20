@@ -1,0 +1,16 @@
+body {
+	font-family: 'Open Sans', sans-serif;
+}
+
+ul.rss-tags {
+	list-style-type: none;
+	padding: 0;
+}
+
+ul.rss-tags li {
+	color: #fff;
+	display: inline-block;
+	padding: 20px;
+	margin: 20px;
+	cursor: pointer;
+}
