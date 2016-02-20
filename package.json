@@ -1,0 +1,18 @@
+{
+  "name": "PressIO",
+  "version": "0.0.0",
+  "description": "hack.summit() hackathon",
+  "main": "test.js",
+  "dependencies": {
+   "express": "4.13.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oyasovsky/PressIO.git"
+  },
+  "author": "oyasovsky",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/oyasovsky/PressIO/issues"
+  }
+}
