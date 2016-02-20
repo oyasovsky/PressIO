@@ -37316,55 +37316,9 @@ define("tinymce/Editor", [
 		 * @return {String} HTML string that got set into the textarea/div.
 		 */
 		save: function(args) {
-			var self = this, elm = self.getElement(), html, form;
-
-			if (!elm || !self.initialized) {
-				return;
-			}
-
-			args = args || {};
-			args.save = true;
-
-			args.element = elm;
-			html = args.content = self.getContent(args);
-
-			if (!args.no_events) {
-				self.fire('SaveContent', args);
-			}
-
-			// Always run this internal event
-			if (args.format == 'raw') {
-				self.fire('RawSaveContent', args);
-			}
-
-			html = args.content;
-
-			if (!/TEXTAREA|INPUT/i.test(elm.nodeName)) {
-				// Update DIV element when not in inline mode
-				if (!self.inline) {
-					elm.innerHTML = html;
-				}
-
-				// Update hidden form element
-				if ((form = DOM.getParent(self.id, 'form'))) {
-					each(form.elements, function(elm) {
-						if (elm.name == self.id) {
-							elm.value = html;
-							return false;
-						}
-					});
-				}
-			} else {
-				elm.value = html;
-			}
-
-			args.element = elm = null;
-
-			if (args.set_dirty !== false) {
-				self.setDirty(false);
-			}
-
-			return html;
+			var content = this.getContent();
+			var blob = new Blob([content], {type: "text/html;charset=utf-8"});
+			saveAs(blob, "article_" + new Date().getTime() + ".html");
 		},
 
 		/**

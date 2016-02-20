@@ -13,10 +13,12 @@ angular.module('pressIO', [])
 var pos = Math.floor(Math.random()*colors.length);
 
 setTimeout(function() {
+	console.log("timeout");
 	i=pos;
 	$("ul.rss-tags li").each(function() {
+		console.log("color: ", colors[i]);
 		$(this).css("background-color", colors[i++]);
 		if (i==colors.length) i=0;
 	});
-}, 1000);
+}, 2000);
 
