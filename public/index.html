@@ -38,12 +38,12 @@
 						{
                                                 text: "Save as Audio",
                                                 onclick: function() {
-                                                        ajaxExportAudio();
+                                                        ajaxExportAudio(tinymce);
                                                 }},
 						{
                                                 text: "Save as Video",                                                                                                                       
                                                 onclick: function() {
-                                                        ajaxExportVideo();                                                                                                                         
+                                                        ajaxExportVideo(tinymce);                                                                                                                         
                                                 }}
 					]	
 				});
@@ -62,7 +62,7 @@
 		</ul>
 		</div>
 		<span id="moreTag" visible="hiddenTopics" ng-click="toggleHiddenTopics()">{{ moreTagText }}</span>
-		<textarea>
+		<textarea name="article">
 			<html>
 				<head>
 					<title>Generated articke by PressIO</title>

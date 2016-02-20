@@ -37,16 +37,16 @@ angular.module('pressIO', [])
 	
 		var text = element.text();
 		var data = $.param({
-			text: text;
+			text: text
 		});
 
 	
 		$http({
-			url: "/api/generateAudio",
-			method: "POST",
-			headers: { 'Content-Type': 'application/x-www-form-urlencoded'},
-			data: data
-		}).success(function(response, status, headers, config){			
+		    url: "/api/generateAudio",
+		    method: "POST",
+		    headers: { 'Content-Type': 'application/x-www-form-urlencoded'},
+		    data: data
+		}).success(function(response, status, headers, config){	
 			console.log("here");
 					
 		});
@@ -59,19 +59,19 @@ angular.module('pressIO', [])
 
   }]);
 
-function ajaxExportAudio() {
+function ajaxExportAudio(tinymce) {
 	var scope = angular.element(
 	document.getElementById("main")).scope();
 	scope.$apply(function () {
-		scope.saveAudio();
+		scope.saveAudio(tinymce);
 	});
 }
 
-function ajaxExportVideo() {
+function ajaxExportVideo(tinymce) {
 	var scope = angular.element(                                                                                                                                                         
         document.getElementById("main")).scope();
         scope.$apply(function () {
-                scope.saveVideo();
+                scope.saveVideo(tinymce);
         });
 }
 
