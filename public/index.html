@@ -34,18 +34,28 @@
 						text: "Save as HTML",
 						onclick: function() {
 							tinymce.triggerSave();
-						}
-					}]	
+						}},
+						{
+                                                text: "Save as Audio",
+                                                onclick: function() {
+                                                        ajaxExportAudio();
+                                                }},
+						{
+                                                text: "Save as Video",                                                                                                                       
+                                                onclick: function() {
+                                                        ajaxExportVideo();                                                                                                                         
+                                                }}
+					]	
 				});
 			}
 			})
 
 		</script>
 	</head>
-	<body ng-controller="RSSTagsController">
+	<body ng-controller="RSSTagsController" id="main">
 		<h1 class="title">PressIO</h1>
 		<ul class="rss-tags">
-		  <li ng-repeat="rss in rssFeeds">
+		  <li ng-repeat="rss in rssFeeds" ng-style="{'background-color': setColor($index)}">
 			{{ rss }}
 		  </li>
 		</ul>
