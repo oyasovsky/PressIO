@@ -6,16 +6,51 @@ angular.module('pressIO', [])
       	"Turkey Bombing",
       	"Middle East Crisis",
       	"Oscar Nominations",
-      	"World Poverty Report"
+      	"World Poverty Report",
+	"aaaa",
+	"bbbb",
+	"ccccc"
     	];
+
+	$scope.hiddenTopics = $scope.rssFeeds.length > 6;
+	$scope.moreTagText = "Show More...";
 
 	$scope.setColor = function(index) {
 		var i = (index>=colors.length) ? index % colors.length : index;
 		return colors[i]; 
 	};
+
+	$scope.setRssClass = function(index) {
+		if ((index<6) || !$scope.hiddenTopics) return "rssVisible";
+		return "rssHidden";
+	};
 	
-	$scope.saveAudio = function() {
-		console.log("in save audio");
+	
+	$scope.toggleHiddenTopics = function() {
+		$scope.hiddenTopics = !$scope.hiddenTopics;
+		$scope.moreTagText = $scope.hiddenTopics ? "Show More.." : "Show Less..."; 
+	};
+
+	$scope.saveAudio = function(tinymce) {
+		var content = tinymce.get('article').getContent();
+		var element = $("<div>"+content+"</div>");
+	
+		var text = element.text();
+		var data = $.param({
+			text: text;
+		});
+
+	
+		$http({
+			url: "/api/generateAudio",
+			method: "POST",
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded'},
+			data: data
+		}).success(function(response, status, headers, config){			
+			console.log("here");
+					
+		});
+
 	};
 
 	$scope.saveVideo = function() {

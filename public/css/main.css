@@ -14,3 +14,30 @@ ul.rss-tags li {
 	margin: 20px;
 	cursor: pointer;
 }
+
+ul.rss-tags li.rssVisible {
+	display:inline-block;
+}
+
+ul.rss-tags li.rssHidden {
+	display: none;
+}
+
+#moreTag {
+	border: 1px solid #6c6c6c;
+	border-radius: 10px;
+	padding: 7px;
+	font-weight: bold;
+	color: #6c6c6c;
+	cursor: pointer;
+}
+
+.rssTagsHolder {
+	margin: 20px;
+}
+
+.title {
+	color: #6c6c6c;
+	font-size: 40px;
+	margin: 20px;
+}
