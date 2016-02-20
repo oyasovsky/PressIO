@@ -63,7 +63,7 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 		    data: data
 		}).success(function(response, status, headers, config){	
 			var fileName = response;
-			$scope.audioSrc = window.location.host + "/audio/"+ fileName;
+			$scope.audioSrc = "http://" + window.location.host + "/audio/"+ fileName;
 			$("#modalAudio .loader").hide();
 			$("#modalAudio .main").show();
 		});
