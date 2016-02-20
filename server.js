@@ -4,6 +4,11 @@ var fs = require('fs');
 var path = require('path');
 var unirest = require('unirest');
 
+var WATSON_API_KEY='42d81bfd30f79b25cd1b3a6b60653e0cbb16b091';
+
+var bucketsHash = {};
+var buckets = null;
+
 var app = express();
 
 app.use(express.static(__dirname + '/public'));

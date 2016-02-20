@@ -46,6 +46,11 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 	};
 
 	$scope.saveAudio = function(tinymce) {
+		$("#modalAudio .loader").show();
+		$("#modalAudio .errors").text("");
+		$("#modalAudio .errors").hide();
+		$("#modalAudio .main").hide();
+
 		$scope.toggleAudioModal();
 		var content = tinymce.get('article').getContent();
 		var element = $("<div>"+content+"</div>");
@@ -66,6 +71,12 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 			$scope.audioSrc = "http://" + window.location.host + "/audio/"+ fileName;
 			$("#modalAudio .loader").hide();
 			$("#modalAudio .main").show();
+		}).error(function(error) {
+			console.log("An error occured: ", error);
+			$scope.error=error;
+			$("#modalAudio .loader").hide();
+		    	$("#modalAudio .errors").text("Sorry, something went wrong! Please try again in another time.")
+			$("#modalAudio .errors").show();
 		});
 
 	};
