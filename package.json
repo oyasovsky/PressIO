@@ -5,6 +5,8 @@
   "main": "test.js",
   "dependencies": {
    "express": "4.13.3",
+   "body-parser": "*",
+   "path": "*" , 
    "feed-read":"*",
    "http":"*",
    "jsdom":"*",

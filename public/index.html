@@ -5,8 +5,10 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<script src="js/main.js"></script>
-                <script src="js/tinymce/js/tinymce/tinymce.js"/>
+	
+		<script type="text/javascript" src="js/tinymce/js/tinymce/tinymce.js"></script>
 		<script xmlns="http://www.w3.org/1999/xhtml" type="application/ecmascript" async="" src="js/FileSaver.min.js"></script>
+	
 		<link rel="stylesheet" type="text/css" href="css/main.css">
 		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 		<script>
@@ -32,22 +34,50 @@
 						text: "Save as HTML",
 						onclick: function() {
 							tinymce.triggerSave();
-						}
-					}]	
+						}},
+						{
+                                                text: "Save as Audio",
+                                                onclick: function() {
+                                                        ajaxExportAudio(tinymce);
+                                                }},
+						{
+                                                text: "Save as Video",                                                                                                                       
+                                                onclick: function() {
+                                                        ajaxExportVideo(tinymce);                                                                                                                         
+                                                }}
+					]	
 				});
 			}
 			})
 
 		</script>
 	</head>
-	<body ng-controller="RSSTagsController">
+	<body ng-controller="RSSTagsController" id="main">
 		<h1 class="title">PressIO</h1>
+		<div class="rssTagsHolder">
 		<ul class="rss-tags">
-		  <li ng-repeat="rss in rssFeeds">
+		  <li ng-repeat="rss in rssFeeds" class="ng-class:setRssClass($index)" ng-style="{'background-color': setColor($index)}">
 			{{ rss }}
 		  </li>
 		</ul>
-		
-		<textarea>Generated Text</textarea>
+		</div>
+		<span id="moreTag" visible="hiddenTopics" ng-click="toggleHiddenTopics()">{{ moreTagText }}</span>
+		<textarea name="article">
+			<html>
+				<head>
+					<title>Generated articke by PressIO</title>
+				</head>
+				<body>
+					<h1 style="text-align: center">Welcome to PressIO - Your one stop shop for article templating</h1>
+					<p>
+						PressIO is an RSS based article template generator.
+					</p>
+
+					<p style="text-align: center">
+						<img src="http://www.s-mediaintl.com/wp-content/uploads/2012/06/article-marketing-copywriting.jpg"/>	
+					</p>
+				</body>
+			</html>
+		</textarea>
 	</body>
 </html>
