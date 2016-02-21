@@ -421,8 +421,8 @@ function generateMain(bucket, unused) {
 		fullTextArr = fullTextArr.replace(/'/g, '"');
 	}
 
-	var fullText = "";
-	fulltextArr.forEach(function(t) { 
+	var fulltext = "";
+	fullTextArr.forEach(function(t) { 
 		fulltext += JSON.stringify(t);
 	});
 
@@ -464,7 +464,11 @@ function generateMain(bucket, unused) {
 		text = obj["paragraphs"]["secondary"];
 	}
 
+	return text;
+
 }
+
+
 function generateLinks(bucket) {
 	var links = [];
 
