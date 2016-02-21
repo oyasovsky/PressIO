@@ -10,6 +10,7 @@
    "unirest": "*",
    "feed-read":"*",
    "http":"*",
+   "find-synonyms": "*",
    "jsdom":"*",
    "wordpos":"*",
    "hashes":"*",

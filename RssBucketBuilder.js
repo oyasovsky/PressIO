@@ -4,6 +4,7 @@ var WordPOS = require('wordpos');
 var wordpos= new WordPOS();
 var deasync = require('deasync');
 var hashes = require('hashes');
+var synonyms = require('find-synonyms');
 
 var excludeWordsSet = new hashes.HashSet();
 excludeWordsSet.add('full');
@@ -26,16 +27,61 @@ var buckets = [[]].pop(); //creating enpty matrix
 var doneParseRss = false;
 var doneGoingOverFeeds = false;
 var doneGetPrimaryPictureLink  = false;
+var doneWithParsingSynonyms = false;
+var doneReplaceSynonyms = false;
 var articleSummary ='';
+var lineToEdit='';
+var verbToReplace ='';
 
 var waitForFunctionParseRss = function() { return !doneParseRss; };
 var waitForFunctionParseRssFeed = function() { return !doneGoingOverFeeds; };
 var waitToImageAndEntities = function() { return !doneGetPrimaryPictureLink ; };
+var waitForParsingSynonyms = function() { return !doneWithParsingSynonyms; };
+var waitForReplaceSynonyms = function() { return !doneReplaceSynonyms; };
+
 function isNumber(n) { return /^-?[\d.]+(?:e-?\d+)?$/.test(n); } 
 
-function paragraphsFormater(pharagraphs) {
-//TODO
-	return pharagraphs;
+function replaceWithSynonyms(syns) {
+console.log('--------');
+console.log(syns);
+	for (var i = 0 ; i < syns.length; i++) {
+	}
+	doneReplaceSynonyms=true;
+}
+
+var getSynonymsParsedResult = function (result) {
+	for (var i = 0; i < result.verbs.length; i++) {
+		verbToReplace = result.verbs[i];
+		synonyms(verbToReplace,5,replaceWithSynonyms);
+		deasync.loopWhile(waitForReplaceSynonyms);
+		doneReplaceSynonyms=false;	
+	}
+	doneWithParsingSynonyms=true;
+}
+
+function fixWrongParingAndReplaceWithSynonyms(paragraph) {
+	for (var i = 0 ; i < paragraph.length; i++) {
+		paragraph[i]=paragraph[i].replace(/\(CNN\)/g,'');
+		paragraph[i]=paragraph[i].replace(/\n/g,'');
+		paragraph[i]=paragraph[i].replace(/\"/g,'');
+		while (paragraph[i].indexOf('""') != -1) {
+			paragraph[i]=paragraph[i].replace(/\'\"/g,'"');
+		}
+		lineToEdit=paragraph[i];
+		wordpos.getPOS(lineToEdit,getSynonymsParsedResult);
+		deasync.loopWhile(waitForParsingSynonyms);
+		paragraph[i]=lineToEdit;
+		lineToEdit='';
+		doneWithParsingSynonyms=false;
+	}
+	return paragraph;
+}
+
+function paragraphsFormater(paragraphs) {
+	paragraphs.main = fixWrongParingAndReplaceWithSynonyms( paragraphs.main);	
+	paragraphs.med = fixWrongParingAndReplaceWithSynonyms( paragraphs.med);
+	paragraphs.secondary = fixWrongParingAndReplaceWithSynonyms( paragraphs.secondary);	
+	return paragraphs;
 }
 
 function returnSortedLowerCaseArray(rawArray) {
