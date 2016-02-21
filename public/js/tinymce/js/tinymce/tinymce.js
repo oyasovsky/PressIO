@@ -36355,7 +36355,7 @@ define("tinymce/Editor", [
 				self.iframeHTML += '<meta http-equiv="Content-Security-Policy" content="' + settings.content_security_policy + '" />';
 			}
 
-			self.iframeHTML += '</head><body id="' + bodyId +
+			self.iframeHTML += '</head><body ondrop="parent.drop(event);" ondragover="parent.allowDrop(event)" id="' + bodyId +
 				'" class="mce-content-body ' + bodyClass +
 				'" data-id="' + self.id + '"><br></body></html>';
 
@@ -38903,6 +38903,61 @@ define("tinymce/EditorManager", [
 		triggerSave: function() {
 			each(this.editors, function(editor) {
 				editor.save();
+			});
+		},
+
+		triggerSynonims: function() {
+	
+			var p = tinymce.activeEditor.dom.select('p');
+			each(p, function(elem) {
+				var txt = $(elem).text();
+				if (txt.trim()==="") return true;
+				
+				var str = $(elem).text(),
+					re = /\[.*?\]/g,
+					match;
+				var replacedStr = str;
+				while (match = re.exec(str)) {
+					var options = match[0].replace("[",'').replace("]",'').split("|");
+					var replace = "<select>";
+					for (var j=0; j<options.length; j++) {
+						replace+="<option value='"+options[j]+"'>"+options[j]+"</option>";
+					}
+					replace+="</select>";
+					replace+="<span class='synonimHidden' style='display:none'>"+match[0]+"</span>"
+					var exp = match[0].replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+					replacedStr = replacedStr.replace(new RegExp(exp, "g"), replace);
+				}
+				$(elem).html(replacedStr);
+			
+			});
+		},
+
+		showSynonims: function() {
+			var p = tinymce.activeEditor.dom.select('p');
+			each(p, function(elem) {
+
+				$(elem).find("select").each(function() {
+					$(this).show();
+				});
+				$(elem).find(".selectedValue").hide();
+			});
+	
+		},
+
+		hideSynonims: function() {
+			var p = tinymce.activeEditor.dom.select('p');
+			each(p, function(elem) {
+				$(elem).find("select").each(function() {
+					var selected = $(this).find("option:selected").text();
+					$(this).hide();
+					if (!$(this).next().hasClass("selectedValue")) {
+						$(this).after("<span class='selectedValue'>"+selected+"</span>");
+					} else {
+						$(this).next().text(selected);
+					}
+					$(elem).find(".selectedValue").show();
+				});
 			});
 		},
 

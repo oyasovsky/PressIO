@@ -83,6 +83,12 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 		$("#metaSelectedRss").text(rss.text);
 		$scope.hiddenTopics = true;
 		$scope.moreTagText = "Show More...";
+		$("#paragraphs").find("li, span.hide").remove();
+
+		$('html, body').animate({
+			scrollTop: $(".editorContainer").offset().top
+		}, 1000); 
+
 		tinymce.get("article").setContent("");
 		$http({
 			url: "/api/loadRssContent?rss=" + encodeURI(rss.text),
@@ -91,11 +97,29 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 			console.log("response: ", response);
 
 			tinymce.get('article').setContent(response.html);
+			tinymce.triggerSynonims();
+			tinymce.hideSynonims();
+
 			var unused = response.unused;
 			
 			for (var i=0; i<unused.length; i++) {
-				$("#paragraphs").append("<li ondragstart='drag(event)' draggable='true'>" + unused[i] + "</li>")
+				for (var j=0; j<unused[i].length; j++) {
+					var str = unused[i][j];
+					var re = /\[.*?\]/g,
+					match;
+					var replacedStr = str;
+					while (match = re.exec(str)) {
+						var options = match[0].replace("[",'').replace("]",'').split("|");
+						var replace = options[0];
+						var exp = match[0].replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+						replacedStr = replacedStr.replace(new RegExp(exp, "g"), replace);
+					}
+				
+					$("#paragraphs").append("<li ondragstart='drag(event)' draggable='true'>" + replacedStr 
+						+ "</li><span class='hide'>"+str+"</span>");
+				}
 			}
+			$(".editorContainer aside").height($(".editorContainer").height());
 		});	
 	};
 
@@ -108,6 +132,9 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 		$scope.toggleAudioModal();
 		var content = tinymce.get('article').getContent();
 		var element = $("<div>"+content+"</div>");
+
+		element.find('select, .synonimHidden')
+		    .replaceWith(function() { return "" });
 	
 		var text = element.text();
 		var data = $.param({
@@ -145,6 +172,9 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 		var content = tinymce.get('article').getContent();
 		var element = $("<div>" + content + "</div>");
 		var title = $(element.find("h1")[0]).text();
+
+		element.find('select, .synonimHidden')
+		    .replaceWith(function() { return "" });
 
 		var text = element.text();	
 		var data = $.param({
@@ -237,6 +267,8 @@ $( document ).ready(function() {
 		ev.stopPropagation();
             	var data=ev.dataTransfer.getData("Text");
 		tinymce.execCommand('mceInsertContent',true,data);
+		tinymce.triggerSynonims();
+		tinymce.hideSynonims();
 		return false;		
 	};
 

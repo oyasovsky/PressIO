@@ -285,22 +285,26 @@ function generateEntity(bucket, inputTitle) {
 
 										}
 										
-
-										summary.getSortedSentences(text, 4, function(err, sorted_sentences) {
-											if (err) {
-												console.log("There was an error.", err);
-												entity["text"] = text;
-											} else {
-												var obj = JSON.parse(JSON.stringify(sorted_sentences));
-												var tmp = "";
-												obj.forEach(function(t) {
-													t = t.replace(/^"+/, '').replace('""','');
-													tmp+=t;
-												});
-												entity["text"]=tmp;
-											}
+										try {
+											summary.getSortedSentences(text, 4, function(err, sorted_sentences) {
+												if (err) {
+													console.log("There was an error.", err);
+													entity["text"] = text;
+												} else {
+													var obj = JSON.parse(JSON.stringify(sorted_sentences));
+													var tmp = "";
+													obj.forEach(function(t) {
+														t = t.replace(/^"+/, '').replace('""','');
+														tmp+=t;
+													});
+													entity["text"]=tmp;
+												}
 	
-										});
+											});
+										} catch(e) {
+											entity["text"] = text;
+										}
+
 
 										if (entityCount>4 || entity["map"]) doneWikiGet = true;
 										doneWikiLoop = true;

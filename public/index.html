@@ -15,13 +15,15 @@
 		<script>
 			tinymce.init({
 			selector: 'textarea',
+			content_style: "a {color: CornflowerBlue }",
+			content_style: "select { border: 1px solid #eee}",
 			height: 700,
 			plugins: [
 			    'advlist autolink lists link image charmap print preview anchor',
 			    'searchreplace visualblocks code fullscreen',
 			    'insertdatetime media table contextmenu paste code'
 			],
-			toolbar: 'savemenu insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+			toolbar: 'savemenu showsynonims hidesynonims | insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
 			content_css: [
 			    '//fast.fonts.net/cssapi/e6dc9b99-64fe-4292-ad98-6974f93cd2a2.css',
 			    '//www.tinymce.com/css/codepen.min.css'
@@ -30,7 +32,7 @@
 				editor.addButton('savemenu', {
 					type: "menubutton",
 					text: "Save As",
-					icon: false,
+					icon: 'save',
 					menu: [{
 						text: "Save as HTML",
 						onclick: function() {
@@ -47,6 +49,25 @@
                                                         ajaxExportVideo(tinymce);                                                                                                                         
                                                 }}
 					]	
+				});
+
+				editor.addButton('showsynonims', {
+					  text: 'Use Synonyms',
+					  icon: false,
+					  onclick: function () {
+						tinymce.showSynonims();
+					  }
+				});
+				editor.addButton('hidesynonims', {
+					  text: 'Close Synonyms',
+					  icon: false,
+					  onclick: function () {
+						tinymce.hideSynonims();
+					  }
+				});
+				editor.on('init', function(args) {
+					tinymce.triggerSynonims();
+					tinymce.hideSynonims();
 				});
 			}
 			})
