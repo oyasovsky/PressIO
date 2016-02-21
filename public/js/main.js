@@ -70,7 +70,7 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 			});
 
 			for (var i=0 ; i<rssArray.length; i++){
-				$scope.rssFeeds[i] = { "text":getShortstRssTitle(rssArray[i]), "sources" :rssArray[i][rssArray[i].length-1].numberOfSimilarities };
+				$scope.rssFeeds[i] = { "text":getShortestRssTitle(rssArray[i]), "sources" :rssArray[i][rssArray[i].length-1].numberOfSimilarities };
 			}
 
 			$scope.hiddenTopics = $scope.rssFeeds.length > 6;
@@ -190,4 +190,15 @@ function ajaxExportVideo(tinymce) {
         });
 }
 
-
+function getShortestRssTitle(rssTopicArray) {
+	var index=0;
+	var titleLength=30000;
+	for (var i = 0; i < rssTopicArray.length; i++) {
+		if (rssTopicArray[i].numberOfSimilarities !== undefined) continue;
+		if (rssTopicArray[i].articleData.title.length < titleLength) {
+			titleLength = rssTopicArray[i].articleData.title.length;
+			index=i;
+		}
+	}
+	return (rssTopicArray[index].articleData.title);
+}
