@@ -42,15 +42,30 @@ var waitForReplaceSynonyms = function() { return !doneReplaceSynonyms; };
 function isNumber(n) { return /^-?[\d.]+(?:e-?\d+)?$/.test(n); } 
 
 function replaceWithSynonyms(syns) {
-console.log('--------');
-console.log(syns);
+	var verbToReplaceWithExtra = verbToReplace.slice(0,1) + "###" +  verbToReplace.slice(1);
+	var synonymsPlaceHolder = '[' + verbToReplaceWithExtra ;
+ 	synonymsPlaceHolder = [synonymsPlaceHolder.slice(0, synonymsPlaceHolder.length-1), "###", synonymsPlaceHolder.slice(synonymsPlaceHolder.length-1)].join('');
+	synonymsPlaceHolder +=  '|';
 	for (var i = 0 ; i < syns.length; i++) {
+		if (syns[i] !== verbToReplace) {
+			syns[i] = syns[i].replace(/\_/g,' ');
+			syns[i] = syns[i].replace(/\([A-Za-z]\)/g,'');
+			synonymsPlaceHolder += syns[i].slice(0,1) + "###" +  syns[i].slice(1);    
+			synonymsPlaceHolder = [synonymsPlaceHolder.slice(0, synonymsPlaceHolder.length-1), "###", synonymsPlaceHolder.slice(synonymsPlaceHolder.length-1)].join('');
+			if (i != syns.length -1) {
+				synonymsPlaceHolder +=  '|';
+			} 
+		}
 	}
+	synonymsPlaceHolder += ']';
+	var re=new RegExp(verbToReplace, 'g');
+	lineToEdit = lineToEdit.replace(re,synonymsPlaceHolder );
 	doneReplaceSynonyms=true;
 }
 
 var getSynonymsParsedResult = function (result) {
 	for (var i = 0; i < result.verbs.length; i++) {
+console.log(i);
 		verbToReplace = result.verbs[i];
 		synonyms(verbToReplace,5,replaceWithSynonyms);
 		deasync.loopWhile(waitForReplaceSynonyms);
@@ -77,10 +92,24 @@ function fixWrongParingAndReplaceWithSynonyms(paragraph) {
 	return paragraph;
 }
 
+function removeTripleNumberSign(paragraph) {
+	fixedParagraph = [];
+	for (var i = 0 ; i < paragraph.length; i++) {
+		var re = new RegExp('###','g');
+		fixedParagraph[i] = paragraph[i].replace(re,'');
+	}
+	return fixedParagraph;
+}
+
 function paragraphsFormater(paragraphs) {
 	paragraphs.main = fixWrongParingAndReplaceWithSynonyms( paragraphs.main);	
 	paragraphs.med = fixWrongParingAndReplaceWithSynonyms( paragraphs.med);
 	paragraphs.secondary = fixWrongParingAndReplaceWithSynonyms( paragraphs.secondary);	
+
+	paragraphs.main = removeTripleNumberSign(paragraphs.main);
+	paragraphs.med = removeTripleNumberSign(paragraphs.med);
+	paragraphs.secondary  = removeTripleNumberSign(paragraphs.secondary);
+
 	return paragraphs;
 }
 
