@@ -51,7 +51,7 @@ app.get('/api/loadRSSContent', function(req, res) {
 	var summary = generateSummary(bucket, unused);
 	var images = getImages(bucket);
 	var mainParagraphs = generateMain(bucket, unused);
-	var sources = generateLinks(buckets);
+	var sources = generateLinks(bucket);
 
 	var html = swig.renderFile('templates/articleTemplate.html', {
 		articleTitle: title,
@@ -62,8 +62,8 @@ app.get('/api/loadRSSContent', function(req, res) {
 		articleMain: mainParagraphs,
 		sources: sources
 	});
-	console.log("mainParagraphs: ", mainParagraphs);
-	res.json({html: "html"});
+	
+	res.json({html: html, unused: unused});
 	res.end();
 });
 
