@@ -91,6 +91,11 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 			console.log("response: ", response);
 
 			tinymce.get('article').setContent(response.html);
+			var unused = response.unused;
+			
+			for (var i=0; i<unused.length; i++) {
+				$("#paragraphs").append("<li ondragstart='drag(event)' draggable='true'>" + unused[i] + "</li>")
+			}
 		});	
 	};
 
@@ -222,6 +227,31 @@ app.directive('modal', function () {
   });
 
 })();
+
+
+$( document ).ready(function() {
+   
+   
+	window.drop = function drop(ev) {
+		ev.preventDefault();
+		ev.stopPropagation();
+            	var data=ev.dataTransfer.getData("Text");
+		tinymce.execCommand('mceInsertContent',true,data);
+		return false;		
+	};
+
+	window.allowDrop = function allowDrop(ev) {
+            ev.preventDefault();
+    	}
+
+    	window.drag = function drag(ev) {
+            var html = $(ev.target).next().html();
+            ev.dataTransfer.setData("Text",html);
+    	
+}
+
+});
+
 
 function ajaxExportAudio(tinymce) {
 	var scope = angular.element(
