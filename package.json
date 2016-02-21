@@ -10,6 +10,7 @@
    "unirest": "*",
    "deasync": "*",
    "swig": "*",
+   "request": "*",
    "node-summary": "*",
    "feed-read":"*",
    "http":"*",

@@ -19,6 +19,12 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 	$scope.toggleAudioModal = function(){
         	$scope.showAudioModal = !$scope.showAudioModal;
     	};
+	
+
+	$scope.showVideoModal = false;
+        $scope.toggleVideoModal = function(){
+                $scope.showVideoModal = !$scope.showVideoModal;
+        };
 
 	$scope.setColor = function(index) {
 		var i = (index>=colors.length) ? index % colors.length : index;
@@ -137,7 +143,7 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 
 		var text = element.text();	
 		var data = $.param({
-			rss: encodeURI($("#metaSelectedRss"),text()),
+			rss: encodeURI($("#metaSelectedRss").text()),
 			title: title,
 			text: text
 		});

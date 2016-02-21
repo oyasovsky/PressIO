@@ -6,6 +6,7 @@ var unirest = require('unirest');
 var deasync = require('deasync');
 var summary = require('node-summary');
 var swig = require('swig');
+var request = require('request');
 
 var WATSON_API_KEY='42d81bfd30f79b25cd1b3a6b60653e0cbb16b091';
 
