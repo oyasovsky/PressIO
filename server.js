@@ -50,8 +50,10 @@ app.get('/api/loadRSSContent', function(req, res) {
 	var ent = generateEntity(bucket, title);
 	var summary = generateSummary(bucket, unused);
 	var images = getImages(bucket);
+	var mainParagraphs = generateMain(bucket, unused);
 
-	console.log("images: ", images);
+
+	console.log("mainParagraphs: ", mainParagraphs);
 	res.json({html: "html"});
 	res.end();
 });
@@ -280,6 +282,106 @@ function getImages(bucket) {
 	return images;
 }
 
+function generateMain(bucket, unused) {
+	var text = [];
+
+	var theChosenOne = Math.floor(Math.random()*(bucket.length-1));
+	for (var idx=0; idx<bucket.length-1; idx++){
+		var obj = bucket[idx];
+		
+		console.log("obj: ", obj);
+		var p = obj["paragraphs"]["main"];
+		if ( typeof p === "string") {
+			p = p.replace(/'/g, '"');
+			p = JSON.parse(p);
+		}
+
+		if (idx === theChosenOne) {
+			text.push(p);
+		} else {
+			unused.push(p);
+		}
+	}
+
+
+	var i=0;
+	var found=false;
+
+	while (!found && i<10) {
+		theChosenOne = Math.floor(Math.random()*(bucket.length-1));
+		var obj = bucket[theChosenOne];
+		var med = obj["paragraphs"]["med"];
+		if (med.length > 0) {
+			found=true;
+			for (var idx=0; idx<bucket.length-1; idx++) {
+				var obj = bucket[idx];
+				var p = obj["paragraphs"]["med"];
+				if (typeof p == "string"){
+                        		p = p.replace(/'/g, '"');
+                        		p = JSON.parse(p);  
+                		}	
+				if (idx === theChosenOne) {
+                        		text.push(p);                                                                                                                          
+                		} else {
+                        		unused.push(p);                                                                                                                        
+                		}
+			}
+		} else {
+			i++;
+		}
+	}
+
+	var obj = bucket[Math.floor(Math.random()*(bucket.length-1))];
+	var fullTextArr = obj["paragraphs"]["secondary"];
+	if (typeof fullTextArr == "string") {
+		fullTextArr = fullTextArr.replace(/'/g, '"');
+	}
+
+	var fullText = "";
+	fulltextArr.forEach(function(t) { 
+		fulltext += JSON.stringify(t);
+	});
+
+
+	var sentences;
+	var tries=0;
+	while (sentences == null && tries < 10) {
+		var sentenceNum = Math.floor(Math.random() * (11)) + 5;
+		summary.getSortedSentences(fulltext, sentenceNum, function(err, sorted_sentences) {
+
+			if (err) {
+				console.log("There was an error.", err);
+			}
+
+			if (sorted_sentences) {
+				sentences = sorted_sentences;
+			} else {
+				return true;
+			}
+
+			var obj = JSON.parse(JSON.stringify(sentences));
+		    	obj.forEach(function(t) {
+				t = t.replace(/^"+/, '').replace('""','');
+				var ignore = t.indexOf("Join us on Facebook");
+				if (ignore > 0) {
+					t = t.substring(0,ignore);
+				}
+			
+				text.push(t);
+			});
+
+		});
+
+		tries++;
+
+	}
+
+	if (sentences == null) {
+		// return original text
+		text = obj["paragraphs"]["secondary"];
+	}
+
+}
 
 //-- Helper funcitons
 
