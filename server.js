@@ -36,6 +36,9 @@ app.get('/api/loadRSSContent', function(req, res) {
 
 	var bucket = bucketsHash[key];
 
+	var title = generateTitle(bucket);
+
+	console.log("title: ", title);
 	res.json({html: "html"});
 	res.end();
 });
@@ -101,3 +104,20 @@ function getShortestRssTitle(rssTopicArray) {
 	}
 	return (rssTopicArray[index].articleData.title);
 }
+
+
+function generateTitle(bucket){
+	var title="";
+	
+	bucket.forEach(function(obj) {
+		try{
+			var t = obj["articleData"]["title"].replace("Watch:","");
+			if (t.length > title.length) title = t;	
+		} catch(e){
+			console.log("error occured: ", e);
+		}
+	});
+	return title;
+}
+
+
