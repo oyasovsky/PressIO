@@ -58,7 +58,8 @@
 		<div class="rssTagsHolder">
 		<ul class="rss-tags">
 		  <li ng-repeat="rss in rssFeeds" class="ng-class:setRssClass($index)" ng-style="{'background-color': setColor($index)}">
-			{{ rss }}
+			{{ rss.text }}
+			 <span class="numOfSources" title="{{ rss.sources}} Feed Sources">{{ rss.sources}}</span>
 		  </li>
 		</ul>
 		</div>
