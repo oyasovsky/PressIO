@@ -5,7 +5,7 @@ var path = require('path');
 var unirest = require('unirest');
 var deasync = require('deasync');
 var summary = require('node-summary');
-
+var swig = require('swig');
 
 var WATSON_API_KEY='42d81bfd30f79b25cd1b3a6b60653e0cbb16b091';
 
@@ -87,6 +87,90 @@ app.post('/api/generateAudio', function(req, res) {
 		    		res.end();
 			});
 });
+
+
+app.post('/api/generateVideo', function(req, res) {
+	var key = decodeURI(req.body.rss);
+	var bucket = bucketsHash[key];
+	var text = req.body.text;
+
+
+	var idx = text.indexOf(("Generated From"));
+	text = text.substring(0, idx);
+
+	var title = req.body.title;
+	var images = getImages(bucket);
+  	var entity = generateEntity(bucket, title);
+
+	var map = entity["map"];
+	if (map && map.length > 0) images.push(map);
+	
+	var definition = swig.renderFile('templates/movieTemplate.xml', {
+		articleTitle: title,
+		images: images,
+		generatedText: text
+	});
+
+
+	var headers = {"Authorization": "Secret KASKJCI4NZHVBOFP6VADGLS5AI"};
+
+	var task = {
+		"tasks": {
+		"task_name": "video.create",
+		"definition": definition
+		}
+	};
+
+
+	request.post({
+		url: "https://dragon.stupeflix.com/v2/create",
+		body: task,
+		headers: headers,
+		json: true
+	}, function (error, httpObj, taskCreation) {
+		if (!error && httpObj.statusCode == 200) {
+		
+			var done = false;
+			(function loop() {
+				request.get({
+					url: "https://dragon.stupeflix.com/v2/status",
+					qs: { tasks: taskCreation[0]["key"] },
+					headers: headers,
+					json: true
+				}, function(error, httpObj, taskStatusAndResult) {
+
+					if (!error && httpObj.statusCode == 200) {
+						console.log("status: " + taskStatusAndResult[0]["status"]);
+
+						if (taskStatusAndResult[0]["status"] == "success" || taskStatusAndResult[0]["status"] == "error" ) {
+							done=true;
+							if (taskStatusAndResult[0]["status"] == "success") {
+									var link = taskStatusAndResult[0]["result"]["export"];
+									res.write(link);
+									res.end();
+							} else {
+									// error
+									res.status(500).send('Oh no! Something went wrong....');
+							}
+						} else {
+							loop();
+						}
+					} else {
+						console.log("An error occured: ", error);
+						res.status(500).send('Something broke!');
+					}
+
+				});
+			}());
+		} else {
+                      console.log("An error occured: ", error);
+                      res.status(500).send('Something broke!');                                                                      
+                }
+
+	});
+});
+
+
 
 app.get('/api/getRssTags', function(req, res) {
 	res.write(buckets);
