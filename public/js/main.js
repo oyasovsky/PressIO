@@ -8,16 +8,7 @@ window.AudioContext = window.AudioContext||window.webkitAudioContext;
 app = angular.module('pressIO', [] );
 	
 app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($scope, $http, $window) {
-	$scope.rssFeeds = [
-      	"David Bowie",
-      	"Turkey Bombing",
-      	"Middle East Crisis",
-      	"Oscar Nominations",
-      	"World Poverty Report",
-	"aaaa",
-	"bbbb",
-	"ccccc"
-    	];
+	$scope.rssFeeds = [];
 
 	$scope.hiddenTopics = $scope.rssFeeds.length > 6;
 	$scope.moreTagText = "Show More...";
@@ -82,6 +73,20 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 	};
 
 
+	$scope.loadRSSContent = function loadRSSContent(rss) {
+		$("#metaSelectedRss").text(rss.text);
+		$scope.hiddenTopics = true;
+		$scope.moreTagText = "Show More...";
+		tinymce.get('article').setContent("");
+		$http({
+			url: "/api/loadRssContent?rss=" + encodeURI(rss.text),
+			method: "GET"
+		}).success(function(response, status, headers, config){	
+			console.log("response: ", response);
+
+			tinymce.get('article').setContent(response.html);
+		});	
+	};
 
 	$scope.saveAudio = function(tinymce) {
 		$("#modalAudio .loader").show();

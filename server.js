@@ -30,6 +30,16 @@ app.listen(3003, function () {
 });
 
 
+app.get('/api/loadRSSContent', function(req, res) {
+	var key = req.query.rss;
+	console.log("key: ", key);
+
+	var bucket = bucketsHash[key];
+
+	res.json({html: "html"});
+	res.end();
+});
+
 app.post('/api/generateAudio', function(req, res) {
 
 	var text = req.body.text;	
