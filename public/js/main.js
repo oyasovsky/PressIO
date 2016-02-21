@@ -77,7 +77,7 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 		$("#metaSelectedRss").text(rss.text);
 		$scope.hiddenTopics = true;
 		$scope.moreTagText = "Show More...";
-		tinymce.get('article').setContent("");
+		tinymce.get("article").setContent("");
 		$http({
 			url: "/api/loadRssContent?rss=" + encodeURI(rss.text),
 			method: "GET"

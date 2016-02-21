@@ -8,6 +8,8 @@
    "body-parser": "*",
    "path": "*" , 
    "unirest": "*",
+   "deasync": "*",
+   "node-summary": "*",
    "feed-read":"*",
    "http":"*",
    "find-synonyms": "*",

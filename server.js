@@ -3,11 +3,20 @@ var bodyParser = require('body-parser')
 var fs = require('fs');
 var path = require('path');
 var unirest = require('unirest');
+var deasync = require('deasync');
+var summary = require('node-summary');
+
 
 var WATSON_API_KEY='42d81bfd30f79b25cd1b3a6b60653e0cbb16b091';
 
 var bucketsHash = {};
 var buckets = null;
+
+var doneWikiGet = false;
+var waitForFunctionCallWiki = function() { return !doneWikiGet; };
+
+var doneWikiLoop = false;                                                                                                                                      var waitForFunctionCallLoop = function() { return !doneWikiLoop; };
+
 
 var app = express();
 
@@ -37,8 +46,10 @@ app.get('/api/loadRSSContent', function(req, res) {
 	var bucket = bucketsHash[key];
 
 	var title = generateTitle(bucket);
+	var ent = generateEntity(bucket, title);
 
-	console.log("title: ", title);
+
+	console.log("ent: ", ent);
 	res.json({html: "html"});
 	res.end();
 });
@@ -114,10 +125,108 @@ function generateTitle(bucket){
 			var t = obj["articleData"]["title"].replace("Watch:","");
 			if (t.length > title.length) title = t;	
 		} catch(e){
-			console.log("error occured: ", e);
 		}
 	});
 	return title;
 }
 
+function generateEntity(bucket, inputTitle) {
+	doneWikiGet = false;
+	var title="";
+	var text="";
+	var entity = {};
+	
+	var objsCount=0;
 
+
+	bucket.forEach(function(obj) {
+		objsCount++;
+		if (obj["articleData"] && !doneWikiGet) {
+			var t = obj["articleData"]["title"].replace("Watch:",''); 
+			
+
+			if (inputTitle===t) {
+				var src=obj["entities"];
+
+				var entityCount = 0;
+				for (var s in src) {
+					doneWikiLoop=false;
+					if (!doneWikiGet) {
+						if (src[s]["disambiguated"] && src[s]["disambiguated"]["name"]) {
+							title = src[s]["disambiguated"]["name"];
+						} else {
+							title = src[s]["text"];
+						}
+				
+						console.log("title: ", title);	
+						if (src[s].map) {
+							entity["map"]=src[s].map;
+						}
+						
+						if (!entity["text"] || entity["text"].trim===""){
+							unirest.get("https://en.wikipedia.org/w/api.php")
+								.query("format=json")
+								.query("action=query")
+								.query("prop=extracts")
+								.query("exintro=")
+								.query("explaintext=")
+								.query("titles="+encodeURI(title))
+								.end(function (result) {
+									var json = result.body;
+
+									if (json["query"] && json["query"]["pages"]) {
+										var pages = json["query"]["pages"];
+										for (var p in pages) {
+											text = pages[p]["extract"];
+										}
+										console.log("text: ", text);
+
+										if (text && text.trim()!="" && text.indexOf("This is a redirect") == -1) {
+											var indx = text.indexOf("^");
+											if (indx >=0) text = text.substring(0, indx);
+
+										}
+										
+
+										summary.getSortedSentences(text, 4, function(err, sorted_sentences) {
+											if (err) {
+												console.log("There was an error.", err);
+												entity["text"] = text;
+											} else {
+												var obj = JSON.parse(JSON.stringify(sorted_sentences));
+												var tmp = "";
+												obj.forEach(function(t) {
+													t = t.replace(/^"+/, '').replace('""','');
+													tmp+=t;
+												});
+												entity["text"]=tmp;
+											}
+	
+										});
+
+										if (entityCount>4 || entity["map"]) doneWikiGet = true;
+										doneWikiLoop = true;
+										return true;
+									}
+									doneWikiLoop = true;
+								});
+						} else {
+							doneWikiLoop = true;
+							if (entityCount>4 || entity["map"]) doneWikiGet = true;
+						}
+					
+						deasync.loopWhile(waitForFunctionCallLoop);
+					}
+					entityCount+=1;
+				}
+			}
+		} else {
+			doneWikiLoop=true;
+		}	
+	});
+	
+	if (objsCount == Object.keys(bucket).length) doneWikiGet=true;
+	deasync.loopWhile(waitForFunctionCallWiki);
+	return entity;
+
+}
