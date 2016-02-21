@@ -76,6 +76,67 @@ ul.rss-tags li.rssHidden {
 	top: -10px;
 }
 
-#mceu_16 {
-	margin-top: 20px;
+
+.editorContainer {
+	border: 1px solid rgba(0,0,0,0.2);
+	margin-top:30px;
+}
+
+.editorContainer aside {
+	float: left;
+    	width: 20%;
+    	height: 100%;
+    	display: inline-block;
+    	position: absolute;
+    	overflow: auto;
+}
+
+.editorContainer aside .par-header {
+	background-color: #444;
+	color: #fff;
+	width: 100%;
+	margin: auto;
+	position: absolute;
+	padding: 10px 0;
+	text-align: center;
+	max-height: 50px;
+}
+
+.editorContainer aside .par-header .small {
+	font-size: 10px;
+}
+
+.editorContainer aside ul {
+	overflow: auto;
+	list-style: auto;
+	padding:5px;
+	margin-top: 50px;
+}
+
+.editorContainer aside ul li {
+	cursor: move;
+	margin: 5px;
+	padding: 5px;
+	background: #efefef;
+	word-wrap: break-word;
+}
+
+.editorContainer .mce-tinymce {
+	float: right;
+    	width: 80%;
+    	display: inline-block;
+}
+
+.loader {
+	background-image: url("../loader.gif");
+	width: 64px;
+	height: 64px;
+	display: block;
+	margin: auto;
+}
+
+.loader-text, #modalVideo .errors{
+	padding: 20px;
+    display: block;
+    text-align: center;
 }

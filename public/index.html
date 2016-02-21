@@ -83,6 +83,17 @@
                         </span>
                 </modal>
 		<span id="moreTag" visible="hiddenTopics" ng-click="toggleHiddenTopics()">{{ moreTagText }}</span>
+
+		<div class="editorContainer">
+		<aside>
+			<div class="par-header">
+				<div>Suggested Paragraphs</div>
+				<div class="small">(Drag us!)</div>
+			</div>
+			<div>
+				<ul id="paragraphs"></ul>
+			</div>
+		</aside>
 		<textarea name="article">
 			<html>
 				<head>
@@ -107,5 +118,7 @@
 				</body>
 			</html>
 		</textarea>
+		<div style="clear: both;"></div>
+		</div>
 	</body>
 </html>

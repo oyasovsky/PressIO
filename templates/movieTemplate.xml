@@ -1,0 +1,15 @@
+<movie service='craftsman-1.0'>
+  <body>
+    <stack>
+      <effect type="sliding">
+	{% for imgSrc in images %}
+		<image filename='{{ imgSrc }}'></image>
+	{% endfor %}
+      </effect>
+      <text type="zone" vector="true" margin-end="10" >{{ articleTitle }}</text>
+      <audio margin-end="1.0" volume='1.0' voice='neospeech:julie'>
+        {{ generatedText }}
+      </audio>
+    </stack>
+  </body>
+</movie>
