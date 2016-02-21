@@ -8,16 +8,7 @@ window.AudioContext = window.AudioContext||window.webkitAudioContext;
 app = angular.module('pressIO', [] );
 	
 app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($scope, $http, $window) {
-	$scope.rssFeeds = [
-      	"David Bowie",
-      	"Turkey Bombing",
-      	"Middle East Crisis",
-      	"Oscar Nominations",
-      	"World Poverty Report",
-	"aaaa",
-	"bbbb",
-	"ccccc"
-    	];
+	$scope.rssFeeds = [];
 
 	$scope.hiddenTopics = $scope.rssFeeds.length > 6;
 	$scope.moreTagText = "Show More...";
@@ -53,8 +44,6 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 			var rssArray = response;
 
 			rssArray.sort(function(a,b){
-				console.log("a: ",a);
-				console.log("b: ", b);
 				for (var i = 0; i < a.length; i++) {
 					if (a[i].numberOfSimilarities) {
 						break;
@@ -65,7 +54,6 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 						break;
 					}
 				}
-				console.log("a[i]: ", a[i]);
 
 				if (a[i].numberOfSimilarities === undefined) return -1;
 				if (b[k].numberOfSimilarities === undefined) return 1;
@@ -73,7 +61,7 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 			});
 
 			for (var i=0 ; i<rssArray.length; i++){
-				$scope.rssFeeds[i] = { "text":getShortstRssTitle(rssArray[i]), "sources" :rssArray[i][rssArray[i].length-1].numberOfSimilarities };
+				$scope.rssFeeds[i] = { "text":getShortestRssTitle(rssArray[i]), "sources" :rssArray[i][rssArray[i].length-1].numberOfSimilarities };
 			}
 
 			$scope.hiddenTopics = $scope.rssFeeds.length > 6;
@@ -85,6 +73,20 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 	};
 
 
+	$scope.loadRSSContent = function loadRSSContent(rss) {
+		$("#metaSelectedRss").text(rss.text);
+		$scope.hiddenTopics = true;
+		$scope.moreTagText = "Show More...";
+		tinymce.get('article').setContent("");
+		$http({
+			url: "/api/loadRssContent?rss=" + encodeURI(rss.text),
+			method: "GET"
+		}).success(function(response, status, headers, config){	
+			console.log("response: ", response);
+
+			tinymce.get('article').setContent(response.html);
+		});	
+	};
 
 	$scope.saveAudio = function(tinymce) {
 		$("#modalAudio .loader").show();
@@ -193,4 +195,15 @@ function ajaxExportVideo(tinymce) {
         });
 }
 
-
+function getShortestRssTitle(rssTopicArray) {
+	var index=0;
+	var titleLength=30000;
+	for (var i = 0; i < rssTopicArray.length; i++) {
+		if (rssTopicArray[i].numberOfSimilarities !== undefined) continue;
+		if (rssTopicArray[i].articleData.title.length < titleLength) {
+			titleLength = rssTopicArray[i].articleData.title.length;
+			index=i;
+		}
+	}
+	return (rssTopicArray[index].articleData.title);
+}

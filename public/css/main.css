@@ -9,6 +9,7 @@ body {
 ul.rss-tags {
 	list-style-type: none;
 	padding: 0;
+	text-align: center;
 }
 
 ul.rss-tags li {
@@ -34,13 +35,29 @@ ul.rss-tags li.rssHidden {
 	font-weight: bold;
 	color: #6c6c6c;
 	cursor: pointer;
+	margin-left: 20px;
 }
 
 .rssTagsHolder {
 	margin: 20px;
 }
 
-.title {
+.numOfSources {
+	font-weight: bold;
+	position: relative;
+	right: -25px;
+	color: #fff;
+	top: -25px;
+	font-size: 13px;
+	float: right;
+	background-color: #444;
+	border-radius: 20px;
+	height: 22px;
+	width: 22px;
+	line-height: 22px;
+}
+
+.title {	
 	color: #6c6c6c;
 	font-size: 40px;
 	margin: 20px;
@@ -57,4 +74,8 @@ ul.rss-tags li.rssHidden {
 .modal-body a.download {
 	position: relative;
 	top: -10px;
+}
+
+#mceu_16 {
+	margin-top: 20px;
 }

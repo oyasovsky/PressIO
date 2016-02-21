@@ -30,6 +30,19 @@ app.listen(3003, function () {
 });
 
 
+app.get('/api/loadRSSContent', function(req, res) {
+	var key = req.query.rss;
+	console.log("key: ", key);
+
+	var bucket = bucketsHash[key];
+
+	var title = generateTitle(bucket);
+
+	console.log("title: ", title);
+	res.json({html: "html"});
+	res.end();
+});
+
 app.post('/api/generateAudio', function(req, res) {
 
 	var text = req.body.text;	
@@ -91,3 +104,20 @@ function getShortestRssTitle(rssTopicArray) {
 	}
 	return (rssTopicArray[index].articleData.title);
 }
+
+
+function generateTitle(bucket){
+	var title="";
+	
+	bucket.forEach(function(obj) {
+		try{
+			var t = obj["articleData"]["title"].replace("Watch:","");
+			if (t.length > title.length) title = t;	
+		} catch(e){
+			console.log("error occured: ", e);
+		}
+	});
+	return title;
+}
+
+
