@@ -9,6 +9,8 @@ var swig = require('swig');
 var request = require('request');
 
 var WATSON_API_KEY='42d81bfd30f79b25cd1b3a6b60653e0cbb16b091';
+var STUPEFLIX_SECRET=['KZWWM2E37VEEJDEMPWNKVIYTGA','JA4XTDCPHZCF5L5CQLXYGNPCNI'];
+var stupeflixIndex=1;
 
 var bucketsHash = {};
 var buckets = null;
@@ -125,8 +127,10 @@ app.post('/api/generateVideo', function(req, res) {
 		generatedText: text
 	});
 
-
-	var headers = {"Authorization": "Secret KASKJCI4NZHVBOFP6VADGLS5AI"};
+	stupeflixIndex=(stupeflixIndex + 1) %2;
+	var secret=STUPEFLIX_SECRET[stupeflixIndex];
+	console.log(secret);
+	var headers = {"Authorization": secret};
 
 	var task = {
 		"tasks": {
@@ -364,7 +368,7 @@ function generateSummary(bucket, unused) {
 }
 
 function getImages(bucket) {
-
+	console.log(bucket);
 	var images = [];
 	bucket.forEach(function(obj) {
 		var src = obj["imageLink"];
