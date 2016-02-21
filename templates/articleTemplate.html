@@ -1,0 +1,33 @@
+<html>
+	<body>
+		<p>Generated Article by Press IO</p>
+		<h1 style="text-align: center;">{{ articleTitle }} </h1>
+		{% for sum in articleSummary %}
+			<p> {{ sum }} </p>
+		{% endfor %}
+
+		<p style="text-align: center;" >
+			{% for m in articleMap %}
+				<img src={{ m }}></img>
+			{% endfor %}
+		</p>
+
+		<p>{{ articleEntity }}</p>
+
+
+		<p style="text-align: center;">
+			{% for imgSrc in images %}
+				<img src={{ imgSrc }}></img>
+			{% endfor %}
+		</p>
+		
+		<h2>Generated From:</h2>
+		<p>
+			<ul>
+				{% for src in sources %}
+					<li><a href='{{ src }}'>{{ src }}</a></li>
+				{% endfor %}
+			</ul>
+		</p>
+	</body>
+</html> 
