@@ -13,7 +13,7 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 	$scope.hiddenTopics = $scope.rssFeeds.length > 6;
 	$scope.moreTagText = "Show More...";
 	$scope.audioSrc = "";
-
+	$scope.videoSrc = "";
 
 	$scope.showAudioModal = false;
 	$scope.toggleAudioModal = function(){
@@ -125,7 +125,45 @@ app.controller('RSSTagsController', ['$scope', '$http', '$window', function ($sc
 	};
 
 	$scope.saveVideo = function() {
-		console.log("in save video");
+		$("#modalVideo .loader, #modalVideo .loader-text").show();
+		$("#modalVideo .errors").text("")
+		$("#modalVideo .errors").hide();
+		$("#modalVideo .main").hide();
+
+		$scope.toggleVideoModal();
+		var content = tinymce.get('article').getContent();
+		var element = $("<div>" + content + "</div>");
+		var title = $(element.find("h1")[0]).text();
+
+		var text = element.text();	
+		var data = $.param({
+			rss: encodeURI($("#metaSelectedRss"),text()),
+			title: title,
+			text: text
+		});
+
+		$http({
+		    url: "/api/generateVideo",
+		    method: "POST",
+		    headers: { 'Content-Type': 'application/x-www-form-urlencoded'},
+		    data: data
+		}).success(function(response, status, headers, config){
+		
+			var filename=response;
+			$scope.videoSrc = filename;
+			$("#modalVideo .loader, #modalVideo .loader-text").hide();
+			$("#modalVideo .main").show();
+		
+
+		}).error(function(error) {
+			console.log("An error occured: ", error);
+			$scope.error=error;
+
+			$("#modalVideo .loader, #modalVideo .loader-text").hide();
+		    	$("#modalVideo .errors").text("Sorry, something went wrong! Please try again in another time.")
+			$("#modalVideo .errors").show();
+		});
+
 	};
 
   }]);

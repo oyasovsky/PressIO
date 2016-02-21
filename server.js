@@ -5,7 +5,7 @@ var path = require('path');
 var unirest = require('unirest');
 var deasync = require('deasync');
 var summary = require('node-summary');
-
+var swig = require('swig');
 
 var WATSON_API_KEY='42d81bfd30f79b25cd1b3a6b60653e0cbb16b091';
 
@@ -49,8 +49,11 @@ app.get('/api/loadRSSContent', function(req, res) {
 	var title = generateTitle(bucket);
 	var ent = generateEntity(bucket, title);
 	var summary = generateSummary(bucket, unused);
+	var images = getImages(bucket);
+	var mainParagraphs = generateMain(bucket, unused);
 
-	console.log("summary: ", summary);
+
+	console.log("mainParagraphs: ", mainParagraphs);
 	res.json({html: "html"});
 	res.end();
 });
@@ -84,6 +87,90 @@ app.post('/api/generateAudio', function(req, res) {
 		    		res.end();
 			});
 });
+
+
+app.post('/api/generateVideo', function(req, res) {
+	var key = decodeURI(req.body.rss);
+	var bucket = bucketsHash[key];
+	var text = req.body.text;
+
+
+	var idx = text.indexOf(("Generated From"));
+	text = text.substring(0, idx);
+
+	var title = req.body.title;
+	var images = getImages(bucket);
+  	var entity = generateEntity(bucket, title);
+
+	var map = entity["map"];
+	if (map && map.length > 0) images.push(map);
+	
+	var definition = swig.renderFile('templates/movieTemplate.xml', {
+		articleTitle: title,
+		images: images,
+		generatedText: text
+	});
+
+
+	var headers = {"Authorization": "Secret KASKJCI4NZHVBOFP6VADGLS5AI"};
+
+	var task = {
+		"tasks": {
+		"task_name": "video.create",
+		"definition": definition
+		}
+	};
+
+
+	request.post({
+		url: "https://dragon.stupeflix.com/v2/create",
+		body: task,
+		headers: headers,
+		json: true
+	}, function (error, httpObj, taskCreation) {
+		if (!error && httpObj.statusCode == 200) {
+		
+			var done = false;
+			(function loop() {
+				request.get({
+					url: "https://dragon.stupeflix.com/v2/status",
+					qs: { tasks: taskCreation[0]["key"] },
+					headers: headers,
+					json: true
+				}, function(error, httpObj, taskStatusAndResult) {
+
+					if (!error && httpObj.statusCode == 200) {
+						console.log("status: " + taskStatusAndResult[0]["status"]);
+
+						if (taskStatusAndResult[0]["status"] == "success" || taskStatusAndResult[0]["status"] == "error" ) {
+							done=true;
+							if (taskStatusAndResult[0]["status"] == "success") {
+									var link = taskStatusAndResult[0]["result"]["export"];
+									res.write(link);
+									res.end();
+							} else {
+									// error
+									res.status(500).send('Oh no! Something went wrong....');
+							}
+						} else {
+							loop();
+						}
+					} else {
+						console.log("An error occured: ", error);
+						res.status(500).send('Something broke!');
+					}
+
+				});
+			}());
+		} else {
+                      console.log("An error occured: ", error);
+                      res.status(500).send('Something broke!');                                                                      
+                }
+
+	});
+});
+
+
 
 app.get('/api/getRssTags', function(req, res) {
 	res.write(buckets);
@@ -241,13 +328,10 @@ function generateSummary(bucket, unused) {
 
 		var c = obj["articleData"]["content"];
 	
-		console.log("c:",c);
-	
 		if (c.indexOf("<") >= 0) {
 			c = c.substring(0 , c.indexOf("<")); 	
 		}
 
-		console.log("c:",c); 	
 
 		if (append) {
 			title.push(c);
@@ -263,10 +347,128 @@ function generateSummary(bucket, unused) {
 	return title;
 }
 
-function generatedLinks(buckets) {
-	var links = [];
+function getImages(bucket) {
+
+	var images = [];
+	bucket.forEach(function(obj) {
+		var src = obj["imageLink"];
+		var result = containsAny(src, ["png", "gif", "jpg", "jpeg"]);
 	
-	buckets.forEach(function (obj) {
+		if (src && src.trim() != ""
+			&& src.indexOf("/ads/")<0 && src.indexOf("viewad")<0
+			&& result!=null) {
+		
+			images.push(src);
+		}
+		
+	});
+
+	return images;
+}
+
+function generateMain(bucket, unused) {
+	var text = [];
+
+	var theChosenOne = Math.floor(Math.random()*(bucket.length-1));
+	for (var idx=0; idx<bucket.length-1; idx++){
+		var obj = bucket[idx];
+		
+		console.log("obj: ", obj);
+		var p = obj["paragraphs"]["main"];
+		if ( typeof p === "string") {
+			p = p.replace(/'/g, '"');
+			p = JSON.parse(p);
+		}
+
+		if (idx === theChosenOne) {
+			text.push(p);
+		} else {
+			unused.push(p);
+		}
+	}
+
+
+	var i=0;
+	var found=false;
+
+	while (!found && i<10) {
+		theChosenOne = Math.floor(Math.random()*(bucket.length-1));
+		var obj = bucket[theChosenOne];
+		var med = obj["paragraphs"]["med"];
+		if (med.length > 0) {
+			found=true;
+			for (var idx=0; idx<bucket.length-1; idx++) {
+				var obj = bucket[idx];
+				var p = obj["paragraphs"]["med"];
+				if (typeof p == "string"){
+                        		p = p.replace(/'/g, '"');
+                        		p = JSON.parse(p);  
+                		}	
+				if (idx === theChosenOne) {
+                        		text.push(p);                                                                                                                          
+                		} else {
+                        		unused.push(p);                                                                                                                        
+                		}
+			}
+		} else {
+			i++;
+		}
+	}
+
+	var obj = bucket[Math.floor(Math.random()*(bucket.length-1))];
+	var fullTextArr = obj["paragraphs"]["secondary"];
+	if (typeof fullTextArr == "string") {
+		fullTextArr = fullTextArr.replace(/'/g, '"');
+	}
+
+	var fullText = "";
+	fulltextArr.forEach(function(t) { 
+		fulltext += JSON.stringify(t);
+	});
+
+	var sentences;
+	var tries=0;
+	while (sentences == null && tries < 10) {
+		var sentenceNum = Math.floor(Math.random() * (11)) + 5;
+		summary.getSortedSentences(fulltext, sentenceNum, function(err, sorted_sentences) {
+
+			if (err) {
+				console.log("There was an error.", err);
+			}
+
+			if (sorted_sentences) {
+				sentences = sorted_sentences;
+			} else {
+				return true;
+			}
+
+			var obj = JSON.parse(JSON.stringify(sentences));
+		    	obj.forEach(function(t) {
+				t = t.replace(/^"+/, '').replace('""','');
+				var ignore = t.indexOf("Join us on Facebook");
+				if (ignore > 0) {
+					t = t.substring(0,ignore);
+				}
+			
+				text.push(t);
+			});
+
+		});
+
+		tries++;
+
+	}
+
+	if (sentences == null) {
+		// return original text
+		text = obj["paragraphs"]["secondary"];
+	}
+
+}
+function generateLinks(bucket) {
+	var links = [];
+
+	bucket.forEach(function(obj) { 
 		var data = obj["articleData"];
 		if (!data) return true;
 
@@ -274,4 +476,16 @@ function generatedLinks(buckets) {
 	});
 
 	return links;
+}
+//-- Helper funcitons
+
+function containsAny(str, substrings) {
+	if (!str) return null;
+    for (var i = 0; i != substrings.length; i++) {
+       var substring = substrings[i];
+       if (str.indexOf(substring) != - 1) {
+         return substring;
+       }
+    }
+    return null; 
 }

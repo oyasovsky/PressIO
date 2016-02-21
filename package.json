@@ -9,6 +9,7 @@
    "path": "*" , 
    "unirest": "*",
    "deasync": "*",
+   "swig": "*",
    "node-summary": "*",
    "feed-read":"*",
    "http":"*",
