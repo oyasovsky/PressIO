@@ -1,4 +1,4 @@
-var colors = ['#1abc9c',  '#57d68d', '#5cace2', '#9b59b6', '#f1c40f', '#e67e22', '#e74e60'];
+var colors = ['#1abc9c', '#57d68d', '#5cace2', '#9b59b6', '#e74e60', '#f1c40f', '#e67e22'];
 
 window.AudioContext = window.AudioContext||window.webkitAudioContext;
   context = new AudioContext();

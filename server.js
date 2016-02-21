@@ -70,7 +70,11 @@ app.get('/api/loadRSSContent', function(req, res) {
 
 app.post('/api/generateAudio', function(req, res) {
 
-	var text = req.body.text;	
+	var text = req.body.text;
+
+	var idx = text.indexOf(("Generated From"));
+        text = text.substring(0, idx);
+	
 	var audioTmpDir = __dirname + "/audioTmp";
  	
 	if (!fs.existsSync(audioTmpDir)){
@@ -256,7 +260,6 @@ function generateEntity(bucket, inputTitle) {
 							title = src[s]["text"];
 						}
 				
-						console.log("title: ", title);	
 						if (src[s].map) {
 							entity["map"]=src[s].map;
 						}
@@ -277,7 +280,6 @@ function generateEntity(bucket, inputTitle) {
 										for (var p in pages) {
 											text = pages[p]["extract"];
 										}
-										console.log("text: ", text);
 
 										if (text && text.trim()!="" && text.indexOf("This is a redirect") == -1) {
 											var indx = text.indexOf("^");
@@ -387,7 +389,6 @@ function generateMain(bucket, unused) {
 	for (var idx=0; idx<bucket.length-1; idx++){
 		var obj = bucket[idx];
 		
-		console.log("obj: ", obj);
 		var p = obj["paragraphs"]["main"];
 		if ( typeof p === "string") {
 			p = p.replace(/'/g, '"');
