@@ -49,8 +49,9 @@ app.get('/api/loadRSSContent', function(req, res) {
 	var title = generateTitle(bucket);
 	var ent = generateEntity(bucket, title);
 	var summary = generateSummary(bucket, unused);
+	var images = getImages(bucket);
 
-	console.log("summary: ", summary);
+	console.log("images: ", images);
 	res.json({html: "html"});
 	res.end();
 });
@@ -241,13 +242,10 @@ function generateSummary(bucket, unused) {
 
 		var c = obj["articleData"]["content"];
 	
-		console.log("c:",c);
-	
 		if (c.indexOf("<") >= 0) {
 			c = c.substring(0 , c.indexOf("<")); 	
 		}
 
-		console.log("c:",c); 	
 
 		if (append) {
 			title.push(c);
@@ -263,5 +261,35 @@ function generateSummary(bucket, unused) {
 	return title;
 }
 
+function getImages(bucket) {
+
+	var images = [];
+	bucket.forEach(function(obj) {
+		var src = obj["imageLink"];
+		var result = containsAny(src, ["png", "gif", "jpg", "jpeg"]);
+	
+		if (src && src.trim() != ""
+			&& src.indexOf("/ads/")<0 && src.indexOf("viewad")<0
+			&& result!=null) {
+		
+			images.push(src);
+		}
+		
+	});
+
+	return images;
+}
 
 
+//-- Helper funcitons
+
+function containsAny(str, substrings) {
+	if (!str) return null;
+    for (var i = 0; i != substrings.length; i++) {
+       var substring = substrings[i];
+       if (str.indexOf(substring) != - 1) {
+         return substring;
+       }
+    }
+    return null; 
+}
