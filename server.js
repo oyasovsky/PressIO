@@ -44,12 +44,13 @@ app.get('/api/loadRSSContent', function(req, res) {
 	console.log("key: ", key);
 
 	var bucket = bucketsHash[key];
+	var unused = [];
 
 	var title = generateTitle(bucket);
 	var ent = generateEntity(bucket, title);
+	var summary = generateSummary(bucket, unused);
 
-
-	console.log("ent: ", ent);
+	console.log("summary: ", summary);
 	res.json({html: "html"});
 	res.end();
 });
@@ -230,3 +231,37 @@ function generateEntity(bucket, inputTitle) {
 	return entity;
 
 }
+
+function generateSummary(bucket, unused) {
+	var title = [];
+	var append = true;
+	bucket.forEach(function(obj) {
+	
+	try {
+
+		var c = obj["articleData"]["content"];
+	
+		console.log("c:",c);
+	
+		if (c.indexOf("<") >= 0) {
+			c = c.substring(0 , c.indexOf("<")); 	
+		}
+
+		console.log("c:",c); 	
+
+		if (append) {
+			title.push(c);
+		} else {
+		
+			unused.push(c);	
+		}
+		append = (Math.random() < 0.5 ? true : false) || title.length < 5;
+
+	} catch(e){}
+	});
+
+	return title;
+}
+
+
+
