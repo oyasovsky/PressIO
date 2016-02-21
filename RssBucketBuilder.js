@@ -14,7 +14,7 @@ excludeWordsSet.add('watch');
 var articlePrimaryPictureLink='';
 var articleEntities='';
 
-var rssFeedsArray = [['http://rss.cnn.com/rss/edition.rss',require('./cnnParser')]];
+var rssFeedsArray = [['http://rss.cnn.com/rss/edition.rss',require('./cnnParser')],['http://feeds.abcnews.com/abcnews/topstories',require('./abcParser')],['http://www.cbsnews.com/latest/rss/main',require('./cbsParser')]];
 var consolidatedData = [];
 var NUMBER_OF_SIMILARITIES_TO_MATCH=2;
 
@@ -65,7 +65,6 @@ function replaceWithSynonyms(syns) {
 
 var getSynonymsParsedResult = function (result) {
 	for (var i = 0; i < result.verbs.length; i++) {
-console.log(i);
 		verbToReplace = result.verbs[i];
 		synonyms(verbToReplace,5,replaceWithSynonyms);
 		deasync.loopWhile(waitForReplaceSynonyms);
@@ -197,13 +196,14 @@ function parseFeed(rssFeed) {
 			}
 		}
 		for (var j = 0 ; j < articles.length ; j++ ) {	
+console.log(j);
 			if (articles[j].link.indexOf('/video/') != -1 ) continue;
 			//Parse title
 			wordpos.getPOS(articles[j].title,getRssParsedResult);
 			deasync.loopWhile(waitForFunctionParseRss);	
 			var paragraphs = parser.getParsedData(articles[j].link);
 			paragraphs=paragraphsFormater(paragraphs);
-			consolidatedData.push({"source":feedUrl, "articleData":articles[j],"parsedData":data,"pharagraps":paragraphs});
+			consolidatedData.push({"source":feedUrl, "articleData":articles[j],"parsedData":data,"paragraphs":paragraphs});
 			doneParseRss=false;
 			data={};
 		}

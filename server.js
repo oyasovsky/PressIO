@@ -263,5 +263,15 @@ function generateSummary(bucket, unused) {
 	return title;
 }
 
+function generatedLinks(buckets) {
+	var links = [];
+	
+	buckets.forEach(function (obj) {
+		var data = obj["articleData"];
+		if (!data) return true;
 
+		links.push(obj["articleData"]["link"])
+	});
 
+	return links;
+}
