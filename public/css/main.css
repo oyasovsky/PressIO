@@ -140,3 +140,8 @@ ul.rss-tags li.rssHidden {
     display: block;
     text-align: center;
 }
+
+#modalVideo .modal-dialog {
+	width: 700px;
+
+} 
