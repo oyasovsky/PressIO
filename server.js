@@ -130,7 +130,7 @@ app.post('/api/generateVideo', function(req, res) {
 	stupeflixIndex=(stupeflixIndex + 1) %2;
 	var secret=STUPEFLIX_SECRET[stupeflixIndex];
 	console.log(secret);
-	var headers = {"Authorization": secret};
+	var headers = {"Authorization": "Secret " + secret};
 
 	var task = {
 		"tasks": {
