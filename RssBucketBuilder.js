@@ -196,7 +196,6 @@ function parseFeed(rssFeed) {
 			}
 		}
 		for (var j = 0 ; j < articles.length ; j++ ) {	
-console.log(j);
 			if (articles[j].link.indexOf('/video/') != -1 ) continue;
 			//Parse title
 			wordpos.getPOS(articles[j].title,getRssParsedResult);
